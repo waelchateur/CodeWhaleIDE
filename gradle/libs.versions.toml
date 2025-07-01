@@ -39,6 +39,8 @@ androidxComposeAccompanist = "0.37.2"
 
 imageToolboxLibs = "3.6.2"
 
+soraEditor = "0.23.6"
+
 [libraries]
 
 kotlinSerialization = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinSerialization" }
@@ -79,6 +81,8 @@ androidxNavigationCompose = { module = "androidx.navigation:navigation-compose",
 androidxComposeConstraintLayout = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "androidxComposeConstraintLayout" }
 
 imageToolboxLibsDynamicTheme = { module = "com.github.T8RIN.ImageToolboxLibs:dynamic-theme", version.ref = "imageToolboxLibs" }
+
+soraEditor = { module = "io.github.Rosemoe.sora-editor:editor", version.ref = "soraEditor" }
 
 [plugins]
 

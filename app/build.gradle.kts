@@ -45,4 +45,5 @@ dependencies {
     androidTestImplementation(libs.bundles.androidxTest)
     coreLibraryDesugaring(libs.androidDesugarJdkLibs)
     implementation(project(":common"))
+    implementation(project(":feature:editor"))
 }
