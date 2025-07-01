@@ -25,5 +25,3 @@ rootProject.name = "CodeWhaleIDE"
 
 include(":app")
 include(":common")
-include(":sdk")
-include(":feature:editor")

@@ -31,6 +31,10 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+    }
 }
 
 dependencies {
@@ -39,4 +43,6 @@ dependencies {
     implementation(libs.bundles.compose)
     testImplementation(libs.bundles.androidxTest)
     androidTestImplementation(libs.bundles.androidxTest)
+    coreLibraryDesugaring(libs.androidDesugarJdkLibs)
+    implementation(project(":common"))
 }

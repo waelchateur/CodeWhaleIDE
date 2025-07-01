@@ -13,7 +13,7 @@ androidMaterial = "1.12.0"
 androidDesugarJdkLibs = "2.1.5"
 
 androidxCoreKtx = "1.16.0"
-androidxAppcompat = "1.7.0"
+androidxAppcompat = "1.7.1"
 androidxActivity = "1.10.1"
 androidxConstraintLayout = "2.2.1"
 androidxStartupRuntime = "1.2.0"
@@ -24,18 +24,20 @@ androidxTestJunit = "1.2.1"
 androidxTestJunit4 = "4.13.2"
 androidxTestEspressoCore = "3.6.1"
 
-androidxComposeBom = "2025.06.00"
+androidxComposeBom = "2025.06.01"
 androidxComposeCompiler = "1.5.3"
-androidxComposeMaterial3 = "1.4.0-alpha15"
-androidxComposeMaterial3Adaptive = "1.2.0-alpha06"
-androidxComposeMaterial3AdaptiveNavigationSuite = "1.4.0-alpha15"
+androidxComposeMaterial3 = "1.4.0-alpha16"
+androidxComposeMaterial3Adaptive = "1.2.0-alpha07"
+androidxComposeMaterial3AdaptiveNavigationSuite = "1.4.0-alpha16"
 androidxComposeMaterialIconsExtended = "1.7.8"
 androidxComposeAnimation = "1.5.0-beta.1"
-androidxComposeLifecycle = "2.8.7"
-androidxComposeNavigation = "2.8.9"
+androidxComposeLifecycle = "2.9.1"
+androidxComposeNavigation = "2.9.0"
 androidxComposeConstraintLayout = "1.1.1"
 
 androidxComposeAccompanist = "0.37.2"
+
+imageToolboxLibs = "3.6.2"
 
 [libraries]
 
@@ -75,6 +77,8 @@ androidxLifecycleRuntimeCompose = { module = "androidx.lifecycle:lifecycle-runti
 androidxLifecycleViewModelCompose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "androidxComposeLifecycle" }
 androidxNavigationCompose = { module = "androidx.navigation:navigation-compose", version.ref = "androidxComposeNavigation" }
 androidxComposeConstraintLayout = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "androidxComposeConstraintLayout" }
+
+imageToolboxLibsDynamicTheme = { module = "com.github.T8RIN.ImageToolboxLibs:dynamic-theme", version.ref = "imageToolboxLibs" }
 
 [plugins]
 
