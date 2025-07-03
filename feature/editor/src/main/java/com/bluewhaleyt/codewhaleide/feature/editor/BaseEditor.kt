@@ -6,18 +6,20 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.util.AttributeSet
 import androidx.core.graphics.ColorUtils
-import com.bluewhaleyt.codewhaleide.common.extension.isCJK
+import com.bluewhaleyt.codewhaleide.feature.editor.utils.EditorController
+import com.bluewhaleyt.codewhaleide.feature.editor.utils.EditorSearchController
 import io.github.rosemoe.sora.event.ColorSchemeUpdateEvent
 import io.github.rosemoe.sora.event.SelectionChangeEvent
+import io.github.rosemoe.sora.event.subscribeAlways
+import io.github.rosemoe.sora.langs.textmate.TextMateColorScheme
+import io.github.rosemoe.sora.langs.textmate.registry.ThemeRegistry
 import io.github.rosemoe.sora.widget.CodeEditor
-import io.github.rosemoe.sora.widget.EditorSearcher
 import io.github.rosemoe.sora.widget.component.EditorAutoCompletion
 import io.github.rosemoe.sora.widget.component.EditorContextMenuCreator
 import io.github.rosemoe.sora.widget.component.EditorDiagnosticTooltipWindow
 import io.github.rosemoe.sora.widget.component.EditorTextActionWindow
 import io.github.rosemoe.sora.widget.getComponent
 import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
-import io.github.rosemoe.sora.widget.subscribeAlways
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,11 +35,16 @@ abstract class BaseEditor @JvmOverloads internal constructor(
     defStyleRes: Int = 0
 ) : CodeEditor(context, attrs, defStyleAttr, defStyleRes) {
 
-    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob()) +
+    protected val scope = CoroutineScope(Dispatchers.Main + SupervisorJob()) +
             CoroutineName("EditorScope")
 
-    private val controller by lazy { EditorController(this) }
-    private val searchController by lazy { EditorSearchController(text, searcher) }
+    protected val controller by lazy { EditorController(this) }
+    protected val searchController by lazy { EditorSearchController(this) }
+
+    private val eventManager by lazy { createSubEventManager() }
+
+    val selectedText
+        get() = controller.getSelectedText()
 
     var selectionHighlightEnabled = true
 
@@ -47,18 +54,41 @@ abstract class BaseEditor @JvmOverloads internal constructor(
                 typefaceText = this
                 typefaceLineNumber = this
             }
+            lineNumberMarginLeft = 40f
+            setDividerMargin(40f, 0f)
+            colorScheme = TextMateColorScheme.create(ThemeRegistry.getInstance())
+            props.apply {
+                enableRoundTextBackground = false
+            }
             updateColorScheme(colorScheme)
             subscribeEvents()
-
-            // TODO: Implement custom popups for following built-in component, except Magnifier
-//            enableBuiltInComponents(false)
-
         }
     }
 
+    override fun hideEditorWindows() {
+        super.hideEditorWindows()
+
+    }
+
+    override fun copyText() {
+        if (text.isNotBlank()) super.copyText()
+    }
+
+    override fun pasteText() {
+        if (text.isNotBlank()) super.pasteText()
+    }
+
+    override fun undo() {
+        if (canUndo()) super.undo()
+    }
+
+    override fun redo() {
+        if (canRedo()) super.redo()
+    }
+
     private fun subscribeEvents() {
-        subscribeAlways(::onColorSchemeUpdate)
-        subscribeAlways(::onSelectionChange)
+        eventManager.subscribeAlways(::onColorSchemeUpdate)
+        eventManager.subscribeAlways(::onSelectionChange)
     }
 
     private fun onColorSchemeUpdate(event: ColorSchemeUpdateEvent) {
@@ -67,23 +97,8 @@ abstract class BaseEditor @JvmOverloads internal constructor(
 
     private fun onSelectionChange(event: SelectionChangeEvent) {
         if (selectionHighlightEnabled) {
-            if (event.isSelected) {
-                val word = controller.getSelectedText()
-                searchController.search(query = word.toString(), caseSensitive = true)
-            } else {
-                scope.launch {
-                    val word = searchController.findWord(event.left.line, event.left.column)
-                    val matches = searchController.findWordMatches(word)
-                    matches?.let {
-                        if (it.positions.size > 1) {
-                            searchController.search(
-                                query = it.word.filter { it.isLetter() || it.toString().isCJK() },
-                                caseSensitive = true,
-                                type = EditorSearcher.SearchOptions.TYPE_WHOLE_WORD
-                            )
-                        } else searcher.stopSearch()
-                    } ?: searcher.stopSearch()
-                }
+            scope.launch {
+                searchController.highlightSelection(event)
             }
         }
     }

@@ -1,0 +1,19 @@
+[
+  {
+    "name": "kotlin",
+    "scopeName": "source.kotlin",
+    "grammar": "kotlin.tmLanguage",
+    "alias": ["kotlin", "kt", "kts"]
+  },
+  {
+    "name": "java",
+    "scopeName": "source.java",
+    "grammar": "java.tmLanguage.json",
+    "alias": ["jav", "java"]
+  },
+  {
+    "name": "plaintext",
+    "scopeName": "text.plain",
+    "grammar": "plaintext.plist"
+  }
+]

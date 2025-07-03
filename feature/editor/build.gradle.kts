@@ -14,6 +14,7 @@ dependencies {
     implementation(libs.bundles.androidx)
     implementation(libs.bundles.compose)
     api(libs.soraEditor)
+    api(libs.soraEditorLanguageTextMate)
     coreLibraryDesugaring(libs.androidDesugarJdkLibs)
     implementation(project(":common"))
 }
