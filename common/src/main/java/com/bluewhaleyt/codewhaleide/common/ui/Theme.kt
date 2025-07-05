@@ -154,28 +154,6 @@ private fun BaseTheme(
     }
 }
 
-@Composable
-fun ThemeSurface(
-    modifier: Modifier = Modifier,
-    containerColor: Color = MaterialTheme.colorScheme.surface,
-    contentColor: Color = contentColorFor(containerColor),
-    content: @Composable BoxScope.() -> Unit
-) {
-    Surface(
-        modifier = if (modifier == Modifier) Modifier.fillMaxSize() else modifier,
-        color = containerColor,
-        contentColor = contentColor
-    ) {
-        Box(
-            modifier = Modifier
-                .imePadding()
-                .safeDrawingPadding()
-        ) {
-            content()
-        }
-    }
-}
-
 @Immutable
 data class ThemeProperties(
     val mode: Mode = Mode.Auto,
@@ -276,10 +254,10 @@ sealed interface SystemBarsVisibility {
             configuration: Configuration,
             controller: WindowInsetsControllerCompat
         ) {
-            controller.show(TYPE_STATUS_BAR)
+            controller.setVisible(TYPE_STATUS_BAR, true)
             if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                controller.hide(TYPE_NAVIGATION_BAR)
-            } else controller.show(TYPE_NAVIGATION_BAR)
+                controller.setVisible(TYPE_NAVIGATION_BAR, false)
+            } else controller.setVisible(TYPE_NAVIGATION_BAR, true)
         }
     }
 
@@ -288,7 +266,7 @@ sealed interface SystemBarsVisibility {
             configuration: Configuration,
             controller: WindowInsetsControllerCompat
         ) {
-            controller.show(TYPE_SYSTEM_BARS)
+            controller.setVisible(TYPE_SYSTEM_BARS, false)
         }
     }
 
@@ -297,7 +275,7 @@ sealed interface SystemBarsVisibility {
             configuration: Configuration,
             controller: WindowInsetsControllerCompat
         ) {
-            controller.show(TYPE_SYSTEM_BARS)
+            controller.setVisible(TYPE_SYSTEM_BARS, true)
         }
     }
 
@@ -306,8 +284,8 @@ sealed interface SystemBarsVisibility {
             configuration: Configuration,
             controller: WindowInsetsControllerCompat
         ) {
-            controller.show(TYPE_STATUS_BAR)
-            controller.hide(TYPE_NAVIGATION_BAR)
+            controller.setVisible(TYPE_STATUS_BAR, true)
+            controller.setVisible(TYPE_NAVIGATION_BAR, false)
         }
     }
 
@@ -316,8 +294,8 @@ sealed interface SystemBarsVisibility {
             configuration: Configuration,
             controller: WindowInsetsControllerCompat
         ) {
-            controller.show(TYPE_NAVIGATION_BAR)
-            controller.hide(TYPE_STATUS_BAR)
+            controller.setVisible(TYPE_NAVIGATION_BAR, true)
+            controller.setVisible(TYPE_STATUS_BAR, false)
         }
     }
 
@@ -330,6 +308,15 @@ sealed interface SystemBarsVisibility {
         private val TYPE_SYSTEM_BARS = WindowInsetsCompat.Type.systemBars()
     }
 
+}
+
+private fun WindowInsetsControllerCompat.setVisible(types: Int, visible: Boolean) = run {
+    if (visible) {
+        show(types)
+    } else {
+        hide(types)
+        systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+    }
 }
 
 @ChecksSdkIntAtLeast(Build.VERSION_CODES.S)

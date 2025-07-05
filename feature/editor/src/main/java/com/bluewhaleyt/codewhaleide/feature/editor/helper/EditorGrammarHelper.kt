@@ -1,4 +1,4 @@
-package com.bluewhaleyt.codewhaleide.feature.editor.utils
+package com.bluewhaleyt.codewhaleide.feature.editor.helper
 
 import android.content.Context
 import io.github.rosemoe.sora.langs.textmate.registry.FileProviderRegistry

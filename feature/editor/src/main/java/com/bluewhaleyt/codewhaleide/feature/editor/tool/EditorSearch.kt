@@ -1,16 +1,17 @@
-package com.bluewhaleyt.codewhaleide.feature.editor.utils
+package com.bluewhaleyt.codewhaleide.feature.editor.tool
 
 import com.bluewhaleyt.codewhaleide.common.extension.isCJK
 import com.bluewhaleyt.codewhaleide.common.extension.runSafe
 import com.bluewhaleyt.codewhaleide.feature.editor.BaseEditor
+import com.bluewhaleyt.codewhaleide.feature.editor.extension.selectedText
 import io.github.rosemoe.sora.event.SelectionChangeEvent
 import io.github.rosemoe.sora.text.CharPosition
 import io.github.rosemoe.sora.widget.EditorSearcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class EditorSearchController internal constructor(
-    private val editor: BaseEditor,
+class EditorSearch internal constructor(
+    private val editor: BaseEditor
 ) {
 
     private val searcher by lazy { editor.searcher }
@@ -18,7 +19,10 @@ class EditorSearchController internal constructor(
     suspend fun highlightSelection(event: SelectionChangeEvent) {
         if (event.isSelected) {
             val word = editor.selectedText
-            search(query = word.toString(), caseSensitive = true)
+            search(
+                query = word.toString(),
+                caseSensitive = true
+            )
         } else {
             val word = findWord(event.left.line, event.left.column)
             val matches = findWordMatches(word)
@@ -66,7 +70,15 @@ class EditorSearchController internal constructor(
         }
     }
 
-    suspend fun findWordMatches(targetWord: String?) = withContext(Dispatchers.IO) {
+    fun terminate() {
+        runSafe {
+            if (searcher.hasQuery()) {
+                searcher.stopSearch()
+            }
+        }
+    }
+
+    private suspend fun findWordMatches(targetWord: String?) = withContext(Dispatchers.IO) {
         if (targetWord == null) return@withContext null
 
         val lines = editor.text.split("\n")
@@ -89,7 +101,7 @@ class EditorSearchController internal constructor(
         return@withContext WordMatches(targetWord, positions)
     }
 
-    fun findWord(line: Int, column: Int): String? {
+    private fun findWord(line: Int, column: Int): String? {
         val lines = editor.text.split("\n")
         if (line < 0 || line >= lines.size) return null
         val currentLine = lines[line]

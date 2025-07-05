@@ -1,7 +1,7 @@
 package com.bluewhaleyt.codewhaleide.feature.editor
 
 import android.app.Application
-import com.bluewhaleyt.codewhaleide.feature.editor.utils.EditorGrammarHelper
+import com.bluewhaleyt.codewhaleide.feature.editor.helper.EditorGrammarHelper
 import io.github.rosemoe.sora.langs.textmate.registry.FileProviderRegistry
 import io.github.rosemoe.sora.langs.textmate.registry.ThemeRegistry
 import io.github.rosemoe.sora.langs.textmate.registry.model.ThemeModel
