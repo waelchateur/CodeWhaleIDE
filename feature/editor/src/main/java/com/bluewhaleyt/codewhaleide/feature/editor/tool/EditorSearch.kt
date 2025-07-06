@@ -3,6 +3,7 @@ package com.bluewhaleyt.codewhaleide.feature.editor.tool
 import com.bluewhaleyt.codewhaleide.common.extension.isCJK
 import com.bluewhaleyt.codewhaleide.common.extension.runSafe
 import com.bluewhaleyt.codewhaleide.feature.editor.BaseEditor
+import com.bluewhaleyt.codewhaleide.feature.editor.event.EditorSearchEvent
 import com.bluewhaleyt.codewhaleide.feature.editor.extension.selectedText
 import io.github.rosemoe.sora.event.SelectionChangeEvent
 import io.github.rosemoe.sora.text.CharPosition
@@ -14,7 +15,8 @@ class EditorSearch internal constructor(
     private val editor: BaseEditor
 ) {
 
-    private val searcher by lazy { editor.searcher }
+    private val searcher by lazy { editor.getSearcher() }
+    internal var query: String? = null
 
     suspend fun highlightSelection(event: SelectionChangeEvent) {
         if (event.isSelected) {
@@ -27,14 +29,14 @@ class EditorSearch internal constructor(
             val word = findWord(event.left.line, event.left.column)
             val matches = findWordMatches(word)
             matches?.let {
-                if (it.positions.size > 1) {
+                if (matches.positions.size > 1) {
                     search(
-                        query = it.word.filter { it.isLetter() || it.isCJK() },
+                        query = matches.word.filter { it.isLetter() || it.isCJK() },
                         caseSensitive = true,
                         type = EditorSearcher.SearchOptions.TYPE_WHOLE_WORD
                     )
-                } else searcher.stopSearch()
-            } ?: searcher.stopSearch()
+                } else stop()
+            } ?: stop()
         }
     }
 
@@ -54,6 +56,9 @@ class EditorSearch internal constructor(
                     newQuery,
                     EditorSearcher.SearchOptions(type, !caseSensitive)
                 )
+
+                this.query = newQuery
+                EditorSearchEvent.dispatch(editor, newQuery)
             }
         }
     }
@@ -70,7 +75,7 @@ class EditorSearch internal constructor(
         }
     }
 
-    fun terminate() {
+    fun stop() {
         runSafe {
             if (searcher.hasQuery()) {
                 searcher.stopSearch()

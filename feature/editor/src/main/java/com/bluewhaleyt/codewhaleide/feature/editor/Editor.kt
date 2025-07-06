@@ -2,6 +2,7 @@ package com.bluewhaleyt.codewhaleide.feature.editor
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.res.Configuration
 import android.util.AttributeSet
 import kotlinx.coroutines.launch
 
@@ -15,7 +16,11 @@ class Editor @JvmOverloads constructor(
 
     init {
         scope.launch {
-            helper.setTextMateTheme("darcula")
+            val isDark = (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) ==
+                    Configuration.UI_MODE_NIGHT_YES
+            val theme = if (isDark) "darcula" else "quietlight"
+
+            helper.setTextMateTheme(theme)
             helper.setTextMateLanguage("java")
         }
     }

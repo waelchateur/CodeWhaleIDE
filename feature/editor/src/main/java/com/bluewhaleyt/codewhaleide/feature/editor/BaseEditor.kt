@@ -5,9 +5,13 @@ import android.content.Context
 import android.graphics.Color
 import android.util.AttributeSet
 import androidx.core.graphics.ColorUtils
+import com.bluewhaleyt.codewhaleide.feature.editor.event.EditorEventAware
+import com.bluewhaleyt.codewhaleide.feature.editor.event.EditorSearchEvent
+import com.bluewhaleyt.codewhaleide.feature.editor.event.EditorTouchEvent
+import com.bluewhaleyt.codewhaleide.feature.editor.event.subscribeAllEvents
 import com.bluewhaleyt.codewhaleide.feature.editor.tool.EditorSearch
 import com.bluewhaleyt.codewhaleide.feature.editor.helper.EditorHelper
-import io.github.rosemoe.sora.event.ClickEvent
+import com.bluewhaleyt.codewhaleide.feature.editor.popup.EditorSearchPopup
 import io.github.rosemoe.sora.event.ColorSchemeUpdateEvent
 import io.github.rosemoe.sora.event.SelectionChangeEvent
 import io.github.rosemoe.sora.event.Unsubscribe
@@ -19,7 +23,6 @@ import io.github.rosemoe.sora.widget.component.EditorDiagnosticTooltipWindow
 import io.github.rosemoe.sora.widget.component.EditorTextActionWindow
 import io.github.rosemoe.sora.widget.getComponent
 import io.github.rosemoe.sora.widget.schemes.EditorColorScheme
-import io.github.rosemoe.sora.widget.subscribeEvent
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -39,13 +42,18 @@ abstract class BaseEditor @JvmOverloads internal constructor(
             CoroutineName("EditorScope")
 
     protected val helper by lazy { EditorHelper(this) }
-    protected val searcher by lazy { EditorSearch(this) }
+    internal val searcher by lazy { EditorSearch(this) }
+
+    private lateinit var searchPopup: EditorSearchPopup
 
     var selectionHighlightEnabled = true
 
     init {
         scope.launch {
-            subscribeAllEvents()
+            EditorTouchEvent.setup(this@BaseEditor)
+            EditorSearchEvent.setup(this@BaseEditor)
+
+            subscribeAllEvents(this@BaseEditor)
             setDividerMargin(40f, 0f)
 
             colorScheme = TextMateColorScheme.create(ThemeRegistry.getInstance())
@@ -56,11 +64,13 @@ abstract class BaseEditor @JvmOverloads internal constructor(
                 enableRoundTextBackground = false
                 boldMatchingDelimiters = false
             }
+
+            searchPopup = EditorSearchPopup(this@BaseEditor)
         }
     }
 
-    override fun onSelectionChange(event: SelectionChangeEvent, unsubscribe: Unsubscribe) {
-        super.onSelectionChange(event, unsubscribe)
+    override fun onEditorSelectionChange(event: SelectionChangeEvent, unsubscribe: Unsubscribe) {
+        super.onEditorSelectionChange(event, unsubscribe)
         if (selectionHighlightEnabled) {
             scope.launch {
                 searcher.highlightSelection(event)
@@ -68,8 +78,8 @@ abstract class BaseEditor @JvmOverloads internal constructor(
         }
     }
 
-    override fun onColorSchemeChange(event: ColorSchemeUpdateEvent, unsubscribe: Unsubscribe) {
-        super.onColorSchemeChange(event, unsubscribe)
+    override fun onEditorColorSchemeChange(event: ColorSchemeUpdateEvent, unsubscribe: Unsubscribe) {
+        super.onEditorColorSchemeChange(event, unsubscribe)
         updateColorScheme(event.colorScheme)
     }
 
@@ -95,21 +105,6 @@ abstract class BaseEditor @JvmOverloads internal constructor(
             EditorColorScheme.HIGHLIGHTED_DELIMITERS_BACKGROUND, color(
                 EditorColorScheme.BLOCK_LINE_CURRENT, 100))
         colorScheme.setColor(EditorColorScheme.HIGHLIGHTED_DELIMITERS_UNDERLINE, Color.TRANSPARENT)
-    }
-
-    private fun subscribeAllEvents() {
-        subscribeEvent(::onClick)
-        subscribeEvent(::onDoubleClick)
-        subscribeEvent(::onLongClick)
-        subscribeEvent(::onScrollChange)
-        subscribeEvent(::onSelectionChange)
-        subscribeEvent(::onContentChange)
-        subscribeEvent(::onTextSizeChange)
-        subscribeEvent(::onSnippetStateChange)
-        subscribeEvent(::onSelectionHandleStateChange)
-        subscribeEvent(::onSearchResultChange)
-        subscribeEvent(::onColorSchemeChange)
-        subscribeEvent(::onKeyPress)
     }
 
     private fun disableAllBuiltInPopups() {
